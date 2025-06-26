@@ -1,0 +1,48 @@
+{
+  "name": "test-workspace-olena",
+  "version": "1.0.0",
+  "description": "Node.js development environment for Olena's assignments",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo '✅ Test runner is ready! Add your test files and update this script.' && exit 0",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "nodejs",
+    "testing",
+    "development"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
+    "@react-oauth/google": "^0.12.2",
+    "@tailwindcss/postcss": "^4.1.11",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "autoprefixer": "^10.4.21",
+    "cors": "^2.8.5",
+    "drizzle-kit": "^0.31.3",
+    "drizzle-orm": "^0.44.2",
+    "express": "^5.1.0",
+    "firebase": "^11.9.1",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^30.0.3",
+    "jest-environment-jsdom": "^30.0.2",
+    "postcss": "^8.5.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-firebase-hooks": "^5.1.1",
+    "tailwindcss": "^4.1.11",
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.0",
+    "ws": "^8.18.2"
+  }
+}

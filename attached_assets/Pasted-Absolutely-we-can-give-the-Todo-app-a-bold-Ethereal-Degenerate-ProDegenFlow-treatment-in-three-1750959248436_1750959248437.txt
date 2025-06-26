@@ -1,0 +1,110 @@
+Absolutely—we can give the Todo app a bold **Ethereal-Degenerate / ProDegenFlow** treatment in three quick steps:
+
+---
+
+## 1 · Define the brand palette & fonts in Tailwind
+
+**`tailwind.config.js`**
+
+```js
+/* eslint-disable @typescript-eslint/no-var-requires */
+const defaultTheme = require('tailwindcss/defaultTheme');
+
+module.exports = {
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Orbitron', ...defaultTheme.fontFamily.sans],
+      },
+      colors: {
+        /** ProDegenFlow cyber-punk neon set **/
+        brand: {
+          bg:   '#0d0d0f',   // near-black base
+          pink: '#ff007c',   // hot-magenta
+          blue: '#00e8ff',   // neon-cyan
+          lime: '#a4ff00',   // electric-lime (accents)
+          gray: '#8c8c8c',   // slate text
+        },
+      },
+    },
+  },
+  plugins: [],
+};
+```
+
+> Orbitron is a free Google Font—add it once via `<link>` in `index.html`:
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" />
+```
+
+---
+
+## 2 · Wrap the app in a dark synth-wave shell
+
+**`src/App.tsx`** (outer div)
+
+```tsx
+return (
+  <div className="min-h-screen font-sans bg-brand-bg text-brand-gray px-4">
+    <header className="flex items-center justify-between py-4">
+      <h1 className="text-brand-blue text-2xl font-semibold tracking-widest">
+        ✦ Spectrum Explorers ✦
+      </h1>
+      <LoginButton />
+    </header>
+
+    {user ? (
+      <>
+        {/* todo components */}
+      </>
+    ) : (
+      <p className="mt-20 text-center text-brand-pink animate-pulse">
+        Connect your cosmic wallet &nbsp;🚀
+      </p>
+    )}
+  </div>
+);
+```
+
+---
+
+## 3 · Give buttons & inputs the neon-glow treatment
+
+Add a tiny **`src/styles/neon.css`** and import it once in `main.tsx`:
+
+```css
+.btn {
+  @apply px-4 py-2 rounded-lg font-semibold transition;
+}
+.btn-primary {
+  @apply bg-brand-pink text-brand-bg shadow-brand-pink/50 shadow-sm;
+}
+.btn-primary:hover {
+  @apply brightness-110 shadow-md;
+}
+.btn-secondary {
+  @apply bg-brand-blue text-brand-bg shadow-brand-blue/50 shadow-sm;
+}
+.btn-secondary:hover {
+  @apply brightness-110 shadow-md;
+}
+```
+
+**`src/main.tsx`**
+
+```ts
+import './styles/neon.css';
+```
+
+---
+
+### Result
+
+* **Orbitron** headlines, neon-pink primary actions, cyan secondary, lime status badges.
+* Jet-black background with slate text keeps everything readable.
+* Glow-on-hover buttons give that “indie hacker / cyber-punk” feel.
+
+Commit the Tailwind config, Orbitron link, neon CSS, and updated JSX, then push—it’s a fast visual win that matches the ProDegenFlow vibe. Let me know if you’d like animated glitch headers or background gradients next!

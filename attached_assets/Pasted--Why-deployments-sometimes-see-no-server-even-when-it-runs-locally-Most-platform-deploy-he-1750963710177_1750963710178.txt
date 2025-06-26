@@ -1,0 +1,112 @@
+### Why deployments sometimes “see no server” even when it runs locally
+
+Most platform → deploy health-checks look for **two things** within 60-120 seconds:
+
+1. **Your process listens on the port they inject** (usually `$PORT`, not a hard-coded 5000).
+2. **It writes something to stdout/stderr** so their agent knows the process is alive.
+
+If either is missing, the platform keeps killing and re-starting the container.
+
+---
+
+## Step-by-step fix
+
+### 1 Bind to the injected port
+
+**`index.js`**
+
+```js
+import express from 'express';
+
+const app  = express();
+const PORT = process.env.PORT || 5000;   // <-- key line
+
+app.get('/health',       (_, res) => res.sendStatus(200));
+app.get('/health-check', (_, res) => res.sendStatus(200));
+app.get('/ping',         (_, res) => res.send('pong'));
+
+app.use(express.static('dist'));   // React build
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server listening on port ${PORT}`);
+});
+```
+
+### 2 Expose the correct start command
+
+**`package.json`**
+
+```jsonc
+{
+  "scripts": {
+    "build":  "vite build",
+    "start":  "node index.js"           // Replit Deploy reads this by default
+  }
+}
+```
+
+*(No `react-scripts start`, no `ts-node` — just plain Node.)*
+
+### 3 Double-check your **`app.json`** (or Procfile)
+
+If the platform uses **`app.json`** (Heroku-style):
+
+```jsonc
+{
+  "name": "cosmic-auth-tasks",
+  "scripts": {
+    "start": "npm start"
+  },
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  }
+}
+```
+
+*If it uses a **Procfile** instead, make sure you have:*
+
+```
+web: npm start
+```
+
+### 4 Make sure health-check path matches platform default
+
+Many PaaS services ping **`/`** or **`/health`**.
+
+* If the platform pings `/`, keep `app.get('/', …)` returning 200 **or** configure their health check to `/health`.
+
+### 5 Commit & push, redeploy
+
+```bash
+git add index.js package.json   # + Procfile or app.json if changed
+git commit -m "fix: bind to $PORT and log on boot"
+git push origin feature/deploy-fix
+```
+
+Trigger a redeploy; watch the logs:
+
+```
+> npm start
+🚀 Server listening on port 12345
+```
+
+If you see that line inside 10 s, the deployment agent should mark the app healthy.
+
+---
+
+## Quick checklist
+
+* [ ] Server uses `process.env.PORT`.
+* [ ] Listens on **0.0.0.0** (not 127.0.0.1).
+* [ ] `npm start` **exactly** starts the server.
+* [ ] Root or `/health` returns **200**.
+* [ ] Console logs at least one line.
+
+Do those, redeploy, and the platform should stop flagging “server not starting.”
+Ping me with any log output if it still loops—happy to troubleshoot the next error!

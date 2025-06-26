@@ -1,0 +1,108 @@
+# ──────────────────────────────────────────────────────────────
+# Agent: build-google-login
+# Purpose: Clone Olena’s test repo, integrate Google Login,
+#          add placeholder test, and push to feature branch.
+# ──────────────────────────────────────────────────────────────
+
+steps:
+  # 1. Clone repo & create branch
+  - name: Clone and branch
+    run: |
+      git clone https://github.com/olenachulovska/jest-integrate-vite.git
+      cd jest-integrate-vite
+      git checkout -b feature/google-login
+
+  # 2. Install dependencies
+  - name: Install project deps
+    run: |
+      pnpm install
+      pnpm add firebase @react-oauth/google react-firebase-hooks
+
+  # 3. Add Firebase helper file
+  - name: Add firebase.ts
+    run: |
+      cat > src/firebase.ts <<'EOF'
+      import { initializeApp } from 'firebase/app';
+      import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+
+      const firebaseConfig = {
+        apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+        authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+        projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+      };
+
+      const app  = initializeApp(firebaseConfig);
+      export const auth = getAuth(app);
+      const provider    = new GoogleAuthProvider();
+
+      export const loginWithGoogle  = () => signInWithPopup(auth, provider);
+      export const logoutFromGoogle = () => signOut(auth);
+      EOF
+
+  # 4. Create LoginButton component
+  - name: Add LoginButton.tsx
+    run: |
+      mkdir -p src/components
+      cat > src/components/LoginButton.tsx <<'EOF'
+      import { FC } from 'react';
+      import { useAuthState } from 'react-firebase-hooks/auth';
+      import { auth, loginWithGoogle, logoutFromGoogle } from '../firebase';
+
+      export const LoginButton: FC = () => {
+        const [user] = useAuthState(auth);
+
+        return user ? (
+          <div className="flex gap-2 items-center">
+            <img src={user.photoURL!} className="w-8 h-8 rounded-full" />
+            <button onClick={logoutFromGoogle} className="btn btn-secondary">
+              Sign out
+            </button>
+          </div>
+        ) : (
+          <button onClick={loginWithGoogle} className="btn btn-primary">
+            Sign in with Google
+          </button>
+        );
+      };
+      EOF
+
+  # 5. Insert import snippets into App.tsx
+  - name: Patch App.tsx
+    run: |
+      sed -i '1i import { LoginButton } from "./components/LoginButton";\nimport { useAuthState } from "react-firebase-hooks/auth";\nimport { auth } from "./firebase";' src/App.tsx
+      # insert user state just after function component line
+      sed -i '0,/function App/s/function App()/function App() {\n  const [user] = useAuthState(auth);/' src/App.tsx
+      # wrap existing JSX (quick & naive) – optional manual tweak later
+      sed -i '/return (/a \\t<LoginButton />' src/App.tsx
+
+  # 6. Add Jest test
+  - name: Add placeholder test
+    run: |
+      mkdir -p tests
+      cat > tests/LoginButton.test.tsx <<'EOF'
+      import { render, screen } from '@testing-library/react';
+      import { LoginButton } from '../src/components/LoginButton';
+
+      test('renders sign in button', () => {
+        render(<LoginButton />);
+        expect(screen.getByText(/sign in with google/i)).toBeInTheDocument();
+      });
+      EOF
+
+  # 7. Add environment file template
+  - name: Add .env.example
+    run: |
+      cat > .env.example <<'EOF'
+      VITE_FIREBASE_API_KEY=YOUR_FIREBASE_KEY
+      VITE_FIREBASE_AUTH_DOMAIN=YOUR_PROJECT.firebaseapp.com
+      VITE_FIREBASE_PROJECT_ID=YOUR_PROJECT_ID
+      EOF
+
+  # 8. Commit & push
+  - name: Commit and push
+    run: |
+      git add .
+      git config user.name  "Replit Agent"
+      git config user.email "agent@repl.it"
+      git commit -m "feat: Google Login via Firebase (automated)"
+      git push -u origin feature/google-login

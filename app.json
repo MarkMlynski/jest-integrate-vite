@@ -1,0 +1,15 @@
+{
+  "name": "react-vite-google-login",
+  "scripts": {
+    "start": "npm start"
+  },
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  }
+}
